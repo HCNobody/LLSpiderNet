@@ -3,7 +3,7 @@
 # LLSpiderNet
 A software for collaboration and information sharing between Linux.
 
-
+## Under development, do not clone please :-)
 
 The application is designed to interconnect multiple devices on Linux. I'm going to emulate the interconnection of everything between Hongmeng OS devices and implement it on Linux.
 
