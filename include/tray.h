@@ -10,12 +10,13 @@
  * 拖盘class
  *
 **/
-class The_Main_tray{
- public:
-   The_Main_tray();
-   ~The_Main_tray();
- private:
-   int argc_;char argv_[];
+class The_Main_tray {
+public:
+  The_Main_tray();
+  ~The_Main_tray();
+private:
+  GtkWidget *window;
+  GtkStatusIcon* gtk_status_icon;
 };
 
 #endif
