@@ -21,7 +21,8 @@ target_link_libraries(tray ${FC_DEP_LIBS})
 
 add_library(debug_tools STATIC ./src/debug_tools.cc)
 
-set(link_d tray debug_tools)
+
+set(link_d tray debug_tools )
 add_executable (LLSpiderNet main.cc)
  
 #add_definitions (${GTK3_CFLAGS_OTHER})

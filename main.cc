@@ -6,9 +6,9 @@
 #include "main.h"
 
 int main(int argc,char *argv[]) {
+  gtk_init(&argc,&argv);
   //初始化托盘
   auto Main_Tray = new The_Main_tray();
-
-
+  gtk_main (); 
   return 0;  
 }
