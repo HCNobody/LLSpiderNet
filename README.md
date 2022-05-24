@@ -7,8 +7,9 @@ A software for collaboration and information sharing between Linux.
 
 The application is designed to interconnect multiple devices on Linux. I'm going to emulate the interconnection of everything between Hongmeng OS devices and implement it on Linux.
 
-
 The software is implemented in c++, based on GTK3. Build with CMake & Ninja.
+
+**By the way, for the convenience of porting and maintenance, I will give up GTK3 after implementing the basic functions, and try to use LVGL or QT to implement the GUI.**
 
 ---
 ## functions
