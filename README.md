@@ -12,7 +12,7 @@ The software is implemented in c++, based on GTK3. Build with CMake & Ninja.
 
 ---
 ## functions
- - [ ] GUI operation interface 
+ - [x] GUI operation interface 
  - [ ] Clipboard sharing 
  - [ ] Remote Desktop Control 
  - [ ]  File sharing

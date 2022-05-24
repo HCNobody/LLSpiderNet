@@ -8,11 +8,20 @@
 /**
  *
  * 拖盘class
+ * 功能：托盘显示图标。点击图标可显示隐藏主窗口。
  *
+ * The_Main_tray()   构造函数
+ * ~The_Main_tray()  析构函数
+ * //tray所使用的回调函数
+ *static void TrayExit
+ *static void TrayIconActivated
+ *static void TrayIconPopup
+ *
+ *GtkWidget *window_;                // 主窗口    
+ *GtkStatusIcon *trayIcon_;          // 托盘图标
+ *GtkWidget *menu_,                  // 托盘选项
+ *          *menuItemExit_;          // 托盘退出应用
 **/
-
-
-
 class The_Main_tray {
 public:
   The_Main_tray();
@@ -31,7 +40,7 @@ public:
 private:
   GtkWidget *window_;
   GtkStatusIcon *trayIcon_;
-  GtkWidget *menu_, *menuItemView_, *menuItemExit_;
+  GtkWidget *menu_, *menuItemExit_;
 
 };
 
