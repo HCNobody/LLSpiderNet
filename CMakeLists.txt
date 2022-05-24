@@ -22,12 +22,12 @@ target_link_libraries(tray ${FC_DEP_LIBS})
 add_library(debug_tools STATIC ./src/debug_tools.cc)
 
 
-set(link_d tray debug_tools )
-add_executable (LLSpiderNet main.cc)
+set(link_d tray debug_tools)
+add_executable(LLSpiderNet main.cc)
  
 #add_definitions (${GTK3_CFLAGS_OTHER})
 message(STATUS "----- ${GTK3_CFLAGS_OTHER}")
 # -pthread
 
-target_link_libraries (LLSpiderNet  ${link_d})
+target_link_libraries(LLSpiderNet  ${link_d})
 

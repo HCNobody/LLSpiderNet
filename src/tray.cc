@@ -3,13 +3,92 @@
 The_Main_tray::The_Main_tray(
   ) 
 {
-  window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_title (GTK_WINDOW (window), "Window");
-  g_signal_connect (window, "destroy", G_CALLBACK (gtk_main_quit), NULL);
-  GtkStatusIcon *trayIcon  = gtk_status_icon_new_from_file("../doc/蜘蛛网万圣节.svg");
+  // The_Main_tray::pThis = nullptr;
 
-  gtk_widget_show (window);
+  window_ = gtk_window_new(GTK_WINDOW_POPUP);
+  gtk_window_set_title(GTK_WINDOW(window_), "Window");
+  gtk_widget_set_size_request(window_, 200, -1);
+  g_signal_connect(window_, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+  gtk_window_set_default_size(GTK_WINDOW(window_),700,400);
+  
+  gtk_window_set_position(GTK_WINDOW(window_),GTK_WIN_POS_CENTER_ALWAYS);
+
+  //set tray icon file
+  trayIcon_ = gtk_status_icon_new_from_file("../resources/蜘蛛网万圣节.svg");
+  //set popup menu for tray icon
+  menu_ = gtk_menu_new();
+  menuItemView_ = gtk_menu_item_new_with_label("View");
+  menuItemExit_ = gtk_menu_item_new_with_label("Exit");
+
+  g_signal_connect(
+    G_OBJECT(menuItemExit_), 
+    "activate", 
+    G_CALLBACK(TrayExit), 
+    NULL
+  );
+
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu_), menuItemExit_);
+  gtk_widget_show_all(menu_);
+  //set tooltip
+  //gtk_status_icon_set_tooltip (trayIcon_, "MsgWatcherGTK");
+  //connect handlers for mouse events
+  g_signal_connect(
+    GTK_STATUS_ICON(trayIcon_),             
+    "activate",
+    G_CALLBACK(TrayIconActivated), 
+    window_
+  );
+  g_signal_connect(
+    GTK_STATUS_ICON(trayIcon_), 
+    "popup-menu",
+    G_CALLBACK(TrayIconPopup), 
+    menu_
+  );
+  gtk_status_icon_set_visible(trayIcon_,true); 
+  //set icon initially invisible
+
 }
 The_Main_tray::~The_Main_tray() {
 
 }
+
+void The_Main_tray::TrayExit(GtkMenuItem *item, gpointer user_data) 
+{
+    printf("exit");
+    gtk_main_quit();
+}
+
+void The_Main_tray::TrayIconActivated(GObject *trayIcon, gpointer window)
+{
+  if(!gtk_widget_get_visible(GTK_WIDGET(window))) {
+    gtk_widget_show(GTK_WIDGET(window));
+    gtk_window_deiconify(GTK_WINDOW(window));    
+  } else {
+    gtk_widget_hide(GTK_WIDGET(window)); 
+  } 
+}
+
+void The_Main_tray::TrayIconPopup(
+    GtkStatusIcon *status_icon, 
+    guint button, 
+    guint32 activate_time, 
+    gpointer popUpMenu
+)
+{
+    gtk_menu_popup(
+      GTK_MENU(popUpMenu), 
+      NULL, 
+      NULL, 
+      gtk_status_icon_position_menu, 
+      status_icon, 
+      button, 
+      activate_time
+    );
+}
+
+
+
+
+
+
+
