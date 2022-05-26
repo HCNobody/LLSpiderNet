@@ -2,6 +2,6 @@
 #define MAIN_H
 
 #include "tray.h" //拖盘头文件
-#include "network.h"
+#include "Network//network.h"
 
 #endif

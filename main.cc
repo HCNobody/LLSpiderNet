@@ -5,6 +5,8 @@
 **/
 #include "main.h"
 
+auto backend = new Connector;
+
 int main(int argc,char *argv[]) {
   gtk_init(&argc,&argv);                              //GTK初始化
   //初始化托盘

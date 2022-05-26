@@ -42,7 +42,6 @@ The_Main_tray::The_Main_tray(
     menu_
   );
   gtk_status_icon_set_visible(trayIcon_,true);                            //显示托盘      
-  //set icon initially invisible
 
 }
 The_Main_tray::~The_Main_tray() {
