@@ -2,6 +2,7 @@
 #define TRAY_H
 
 #include <gtk/gtk.h>
+#include <string.h>
 
 #include "debug_tools.h"
 

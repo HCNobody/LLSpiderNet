@@ -12,7 +12,14 @@ The_Main_tray::The_Main_tray(
   gtk_window_set_position(GTK_WINDOW(window_),GTK_WIN_POS_CENTER_ALWAYS); //窗口居中
 
   //set tray icon file
-  trayIcon_ = gtk_status_icon_new_from_file("../resources/蜘蛛网万圣节.svg");
+  std::string icon_path = "resources/蜘蛛网万圣节.svg";
+#ifndef INSTALLED
+  icon_path = "../" + icon_path;
+#else
+  icon_path = INSTALLED + icon_path;
+#endif
+  trayIcon_ = gtk_status_icon_new_from_file(icon_path.c_str());
+
   //set popup menu for tray icon
   menu_ = gtk_menu_new();
   menuItemExit_ = gtk_menu_item_new_with_label("Exit");

@@ -4,14 +4,25 @@ project(LLSpiderNet)
 message("-- 开始载入项目LLSpiderNet")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON) 
 
+#全局变量设制
+message("---------------------------------------")
+message("---- 全局变量:")
+set(USE_DEBUG_CODE ON)
+message("-- USE_DEBUG_CODE : ${USE_DEBUG_CODE}")
+
 #子项目
+message("---------------------------------------")
 message("-- 加载子项目")
 message("---------------------------------------")
 message("载入Network模块")
 add_subdirectory(./src/Network)
 message("---------------------------------------")
 
-set(link_d ${link_d} network)
+set(link_d ${link_d}
+)
+set(link_d_shared ${link_d_shared}
+                  network
+)
 message("-- 子项目加载完成,进入主项目")
 
 #GTK3编译选项获取
@@ -34,9 +45,14 @@ target_link_libraries(tray ${FC_DEP_LIBS})
 add_library(debug_tools STATIC ./src/debug_tools.cc)
 
 #动态库编译
+set(link_d_shared ${link_d_shared})
 
 #链接文件
-set(link_d ${link_d} tray debug_tools)
+set(link_d ${link_d} 
+           ${link_d_shared}
+            tray 
+            debug_tools
+)
 #生成目标文件
 add_executable(LLSpiderNet main.cc)
  
@@ -44,10 +60,28 @@ add_executable(LLSpiderNet main.cc)
 message(STATUS "----- ${GTK3_CFLAGS_OTHER}")
 # -pthread
 set(CMAKE_CXX_FLAGS "-pthread")
+if(USE_DEBUG_CODE)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
+endif()
 message(STATUS "CMAKE_CXX_FLAGS = ${CMAKE_CXX_FLAGS}")
 #链接
 message("----------------------")
-message("-- 库链结:${link_d}")
+message("-- 库链接:${link_d}")
 
 target_link_libraries(LLSpiderNet ${link_d})
 
+
+#install
+set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+set_target_properties(LLSpiderNet PROPERTIES INSTALL_RPATH "/usr/local/lib/LLSpiderNet")
+install(TARGETS LLSpiderNet ${link_d_shared}
+        EXPORT LLSpiderNet
+        LIBRARY DESTINATION lib/LLSpiderNet #动态库
+        #ARCHIVE DESTINATION lib/LLSpiderNet  #静态库
+        RUNTIME DESTINATION bin  #可制行文件
+        #PUBLIC_HEADER DESTINATION include #头文件
+)
+install(SCRIPT ./install.cmake)
+if(INSTALL_SWITCH) 
+  add_definitions(-DINSTALLED="/usr/local/share/LLSpiderNet/")
+endif()
