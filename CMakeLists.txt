@@ -72,16 +72,16 @@ target_link_libraries(LLSpiderNet ${link_d})
 
 
 #install
-set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-set_target_properties(LLSpiderNet PROPERTIES INSTALL_RPATH "/usr/local/lib/LLSpiderNet")
-install(TARGETS LLSpiderNet ${link_d_shared}
-        EXPORT LLSpiderNet
-        LIBRARY DESTINATION lib/LLSpiderNet #动态库
-        #ARCHIVE DESTINATION lib/LLSpiderNet  #静态库
-        RUNTIME DESTINATION bin  #可制行文件
-        #PUBLIC_HEADER DESTINATION include #头文件
-)
-install(SCRIPT ./install.cmake)
 if(INSTALL_SWITCH) 
+  set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+  set_target_properties(LLSpiderNet PROPERTIES INSTALL_RPATH "/usr/local/lib/LLSpiderNet")
+  install(TARGETS LLSpiderNet ${link_d_shared}
+          EXPORT LLSpiderNet
+          LIBRARY DESTINATION lib/LLSpiderNet #动态库
+          #ARCHIVE DESTINATION lib/LLSpiderNet  #静态库
+          RUNTIME DESTINATION bin  #可制行文件
+          #PUBLIC_HEADER DESTINATION include #头文件
+  )
+  install(SCRIPT ./install.cmake)
   add_definitions(-DINSTALLED="/usr/local/share/LLSpiderNet/")
 endif()
