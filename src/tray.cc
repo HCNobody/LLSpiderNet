@@ -16,7 +16,7 @@ The_Main_tray::The_Main_tray(
 #ifndef INSTALLED
   icon_path = "../" + icon_path;
 #else
-  Shot_icon_path = INSTALLED + icon_path;
+  icon_path = INSTALLED + icon_path;
 #endif
   trayIcon_ = gtk_status_icon_new_from_file(icon_path.c_str());
 
