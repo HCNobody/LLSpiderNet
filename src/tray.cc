@@ -2,7 +2,7 @@
 
 The_Main_tray::The_Main_tray(
   ) 
-{
+{ 
   window_ = gtk_window_new(GTK_WINDOW_POPUP);                             //初始化窗口
   gtk_window_set_title(GTK_WINDOW(window_), "Window");                    //设置窗口标题
   gtk_widget_set_size_request(window_, 200, -1);                          //窗口大小
@@ -57,6 +57,9 @@ The_Main_tray::The_Main_tray(
     menu_
   );
   gtk_status_icon_set_visible(trayIcon_,true);                            //显示托盘      
+  //
+  //
+  //
 }
 The_Main_tray::~The_Main_tray() {
   delete backend_;
@@ -97,12 +100,14 @@ void The_Main_tray::TrayIconPopup(
 }
 
 
-void The_Main_tray::TrayRadio(void* T) {
+void The_Main_tray::TrayRadio(void *T) {
   The_Main_tray *temple_Tray = (The_Main_tray *)T;
   temple_Tray->backend_->Shot_Radio();
 }
 
 
-
+void The_Main_tray::Monitor_Radio(void *T) {
+  The_Main_tray *temple_Tray = (The_Main_tray *)T;
+}
 
 
