@@ -16,13 +16,14 @@ The_Main_tray::The_Main_tray(
 #ifndef INSTALLED
   icon_path = "../" + icon_path;
 #else
-  icon_path = INSTALLED + icon_path;
+  Shot_icon_path = INSTALLED + icon_path;
 #endif
   trayIcon_ = gtk_status_icon_new_from_file(icon_path.c_str());
 
   //set popup menu for tray icon
   menu_ = gtk_menu_new();
   menuItemExit_ = gtk_menu_item_new_with_label("Exit");
+  menuItemRadio_ = gtk_menu_item_new_with_label("广播");
 
   g_signal_connect(                                                       //信号绑定：退出窗口
     G_OBJECT(menuItemExit_), 
@@ -30,7 +31,14 @@ The_Main_tray::The_Main_tray(
     G_CALLBACK(TrayExit), 
     NULL
   );
+  g_signal_connect(                                                       //信号绑定：广播
+    G_OBJECT(menuItemRadio_), 
+    "activate", 
+    G_CALLBACK(TrayRadio), 
+    this
+  );
 
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu_), menuItemRadio_);            //
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_), menuItemExit_);            //
   gtk_widget_show_all(menu_);                                             //显示托盘
   //set tooltip
@@ -52,7 +60,7 @@ The_Main_tray::The_Main_tray(
 
 }
 The_Main_tray::~The_Main_tray() {
-
+  delete backend_;
 }
 
 void The_Main_tray::TrayExit(GtkMenuItem *item, gpointer user_data) 
@@ -90,6 +98,10 @@ void The_Main_tray::TrayIconPopup(
 }
 
 
+void The_Main_tray::TrayRadio(void* T) {
+  The_Main_tray *temple_Tray = (The_Main_tray *)T;
+  temple_Tray->backend_->Shot_Radio();
+}
 
 
 

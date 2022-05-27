@@ -5,7 +5,6 @@
 **/
 #include "main.h"
 
-auto backend = new Connector;
 
 int main(int argc,char *argv[]) {
   gtk_init(&argc,&argv);                              //GTK初始化
@@ -13,6 +12,5 @@ int main(int argc,char *argv[]) {
   auto Main_Tray = new The_Main_tray();               //托盘+主窗口
 
   gtk_main ();                                        //GTK循环
-  delete backend;
   return 0;  
 }

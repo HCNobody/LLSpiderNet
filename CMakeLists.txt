@@ -9,6 +9,7 @@ message("---------------------------------------")
 message("---- 全局变量:")
 set(USE_DEBUG_CODE ON)
 message("-- USE_DEBUG_CODE : ${USE_DEBUG_CODE}")
+message("-- INSTALL_SWITCH : ${INSTALL_SWITCH}")
 
 #子项目
 message("---------------------------------------")
@@ -40,7 +41,7 @@ include_directories(./include)
 
 #静态库编译
 add_library(tray STATIC ./src/tray.cc)
-target_link_libraries(tray ${FC_DEP_LIBS})
+target_link_libraries(tray ${FC_DEP_LIBS} network)
 
 add_library(debug_tools STATIC ./src/debug_tools.cc)
 

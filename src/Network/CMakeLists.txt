@@ -11,4 +11,7 @@ if(USE_DEBUG_CODE)
 endif()
 message(STATUS "CMAKE_CXX_FLAGS = ${CMAKE_CXX_FLAGS}")
 
+add_library(ThreadPool STATIC ./ThreadPool.cc)
+
 add_library(network SHARED ./network.cc)
+target_link_libraries(network ThreadPool)

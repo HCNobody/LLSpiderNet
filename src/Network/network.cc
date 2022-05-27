@@ -2,14 +2,24 @@
 
 Connector::Connector() {
   TP_->init();
-  TP_->submit(NetWork::Radio_to_others);
+  Shot_Radio();
+  thd_Client = std::thread(Client);
 }
 Connector::~Connector() {
+  thd_Client.join();
   TP_->shutdown();
   delete TP_;
 }
-namespace NetWork {
-  void Radio_to_others() {
-    printf("1");
-  }
+
+void Connector::Client() {
+}
+
+void Connector::Shot_Radio() {
+  std::thread A(Radio,this);
+  A.detach();
+}
+
+void Connector::Radio(void* C) {
+  Connector *connector = (Connector *)C;
+  printf("11");
 }

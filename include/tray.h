@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "debug_tools.h"
+#include "Network/network.h"
 
 /**
  *
@@ -37,12 +38,13 @@ public:
     guint32 activate_time, 
     gpointer popUpMenu
   );
+  static void TrayRadio(void* T);
 
 private:
   GtkWidget *window_;
   GtkStatusIcon *trayIcon_;
-  GtkWidget *menu_, *menuItemExit_;
-
+  GtkWidget *menu_, *menuItemExit_, *menuItemRadio_;
+  Connector *backend_ = new Connector;
 };
 
 

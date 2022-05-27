@@ -9,8 +9,12 @@
 #include <unistd.h>
 #include <string.h>
 #include <list>
+#include <iostream>
+#include <thread>
+#include <mutex>
+#include <vector>
 
-#include "thread_pool.h"
+ #include "ThreadPool.h"
 
 struct Connecter {
   int32_t id_;
@@ -20,13 +24,17 @@ class Connector {
 public:
   Connector();
   ~Connector();
+  void Shot_Radio();
+public:
 private:
-  ThreadPool *TP_ = new ThreadPool(4);
-  std::list<Connector *> connecter;
+  static void Client();
+  static void Radio(void* C);
+private:
+  std::list<Connecter *> connecter_;
+  std::vector<std::thread> thd_;
+  std::thread thd_Client;
+  ThreadPool* TP_ = new ThreadPool(4);
 };
 
-namespace NetWork {
-  void Radio_to_others();
-}
 
 #endif
