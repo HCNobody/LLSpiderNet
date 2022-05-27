@@ -1,25 +1,34 @@
 #include "network.h"
 
 Connector::Connector() {
-  TP_->init();
   Shot_Radio();
-  thd_Client = std::thread(Client);
+  thd_Client = std::thread(Client,this);
 }
 Connector::~Connector() {
   thd_Client.join();
-  TP_->shutdown();
-  delete TP_;
 }
 
-void Connector::Client() {
+void Connector::Client(void* C) {
+  Connector *connector = (Connector *)C;
+  auto PL = new ThreadPool(4);
+  while (true) {
+   printf("1\n");
+   sleep(2);
+  } 
+  //
+  delete PL;
 }
 
 void Connector::Shot_Radio() {
-  std::thread A(Radio,this);
+  std::thread A = std::thread(Radio,this);
   A.detach();
 }
 
 void Connector::Radio(void* C) {
   Connector *connector = (Connector *)C;
-  printf("11");
+  if(connector->radio_clicked_times <= 3){
+    ++connector->radio_clicked_times;
+    sleep(10);
+    --connector->radio_clicked_times;
+  }
 }

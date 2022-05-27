@@ -3,9 +3,13 @@
 
 #include <gtk/gtk.h>
 #include <string.h>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
 
 #include "debug_tools.h"
 #include "Network/network.h"
+#include "bridge.h"
 
 /**
  *

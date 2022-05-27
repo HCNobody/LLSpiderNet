@@ -57,7 +57,6 @@ The_Main_tray::The_Main_tray(
     menu_
   );
   gtk_status_icon_set_visible(trayIcon_,true);                            //显示托盘      
-
 }
 The_Main_tray::~The_Main_tray() {
   delete backend_;

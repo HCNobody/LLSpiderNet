@@ -14,7 +14,8 @@
 #include <mutex>
 #include <vector>
 
- #include "ThreadPool.h"
+#include "ThreadPool.h"
+
 
 struct Connecter {
   int32_t id_;
@@ -27,13 +28,12 @@ public:
   void Shot_Radio();
 public:
 private:
-  static void Client();
+  static void Client(void* C);
   static void Radio(void* C);
 private:
+  int32_t radio_clicked_times = 0;
   std::list<Connecter *> connecter_;
-  std::vector<std::thread> thd_;
   std::thread thd_Client;
-  ThreadPool* TP_ = new ThreadPool(4);
 };
 
 
