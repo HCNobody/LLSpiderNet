@@ -12,6 +12,7 @@ endif()
 message(STATUS "CMAKE_CXX_FLAGS = ${CMAKE_CXX_FLAGS}")
 
 add_library(ThreadPool STATIC ./ThreadPool.cc)
+add_library(Getip STATIC ./Getip.cc)
 
 add_library(network SHARED ./network.cc)
-target_link_libraries(network ThreadPool)
+target_link_libraries(network ThreadPool Getip)

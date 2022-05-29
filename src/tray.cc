@@ -57,9 +57,6 @@ The_Main_tray::The_Main_tray(
     menu_
   );
   gtk_status_icon_set_visible(trayIcon_,true);                            //显示托盘      
-  //
-  //
-  //
 }
 The_Main_tray::~The_Main_tray() {
   delete backend_;
@@ -104,10 +101,4 @@ void The_Main_tray::TrayRadio(void *T) {
   The_Main_tray *temple_Tray = (The_Main_tray *)T;
   temple_Tray->backend_->Shot_Radio();
 }
-
-
-void The_Main_tray::Monitor_Radio(void *T) {
-  The_Main_tray *temple_Tray = (The_Main_tray *)T;
-}
-
 

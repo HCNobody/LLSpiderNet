@@ -7,8 +7,8 @@
 #include <mutex>
 #include <condition_variable>
 
-#include "debug_tools.h"
 #include "Network/network.h"
+
 
 /**
  *
@@ -42,7 +42,8 @@ public:
     gpointer popUpMenu
   );
   static void TrayRadio(void *T);
-  static void Monitor_Radio(void *T);
+
+  friend void Monitor(The_Main_tray *T,Connector *C);
 private:
   GtkWidget *window_;
   GtkStatusIcon *trayIcon_;
