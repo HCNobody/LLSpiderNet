@@ -8,6 +8,7 @@
 #include <condition_variable>
 
 #include "Network/network.h"
+#include "../ToolKit/heads/Event_T_Callback.h"
 
 
 /**
@@ -45,6 +46,7 @@ private:
   static void TrayRadio(void *T);
   static void NewConnect(void *T);
   static void DeleteConnect(void *T);
+  static void play(int k);
 private:
   std::list<std::thread*> pthd_list_;
   GtkWidget *window_;

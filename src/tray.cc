@@ -3,9 +3,11 @@
 
 std::list<Button *>Button_List;
 
+
 The_Main_tray::The_Main_tray(
   ) 
 { 
+  TooLKit::Event_T_Callback::Bind(backend_,"Radio",0,play,-12);
   window_ = gtk_window_new(GTK_WINDOW_POPUP);                             //初始化窗口
   gtk_window_set_title(GTK_WINDOW(window_), "Window");                    //设置窗口标题
   gtk_widget_set_size_request(window_, 200, -1);                          //窗口大小
@@ -51,7 +53,6 @@ The_Main_tray::The_Main_tray(
     menu_
   );
   gtk_status_icon_set_visible(trayIcon_,true);                            //显示托盘      
-                                                                          //
   
   std::thread pthd_newconnect = std::thread(NewConnect,this);
   pthd_newconnect.detach();
@@ -66,6 +67,10 @@ The_Main_tray::~The_Main_tray() {
   for(auto i:pthd_list_)pthread_cancel(i->native_handle());
   Button_List.clear();
   delete backend_;
+}
+
+void The_Main_tray::play(int k) {
+  std::cout <<k<<std::endl;
 }
 
 void The_Main_tray::TrayExit(GtkMenuItem *item, gpointer user_data) 

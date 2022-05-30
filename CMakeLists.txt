@@ -17,12 +17,15 @@ message("-- 加载子项目")
 message("---------------------------------------")
 message("载入Network模块")
 add_subdirectory(./src/Network)
+message("载入ToolKit模块")
+add_subdirectory(./ToolKit)
 message("---------------------------------------")
 
 set(link_d ${link_d}
 )
 set(link_d_shared ${link_d_shared}
                   network
+                  Event_T_Callback
 )
 message("-- 子项目加载完成,进入主项目")
 
@@ -42,8 +45,8 @@ include_directories(./include)
 #静态库编译
 add_library(tray STATIC ./src/tray.cc)
 add_library(button STATIC ./src/Button.cc)
-target_link_libraries(button ${FC_DEP_LIBS} network)
-target_link_libraries(tray ${FC_DEP_LIBS} network button)
+target_link_libraries(button ${FC_DEP_LIBS} network Event_T_Callback)
+target_link_libraries(tray ${FC_DEP_LIBS} network button Event_T_Callback)
 
 
 #动态库编译

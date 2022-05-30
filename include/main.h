@@ -5,6 +5,7 @@
 #include <string>
 
 #include "tray.h" //拖盘头文件
+#include "../ToolKit/heads/Event_T_Callback.h"
 
 namespace Main {
   void Init() {

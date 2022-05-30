@@ -6,7 +6,7 @@ Connector::Connector() {
   Local_ip_char_ = Getip(); 
   inet_pton(AF_INET,Local_ip_char_.c_str(),&Local_ip_int32_);
 
-  thd_Shot_Radio_ = std::thread(Shot_Radio,this);thd_Shot_Radio_.detach();
+  thd_Shot_Radio_ = std::thread(Shot_Radio,this);
   thd_UDP_Server_ = std::thread(UDP_Server,this);
   thd_TCP_Server_ = std::thread(TCP_Server,this);
 }
@@ -190,19 +190,20 @@ void Connector::Client(void *C,std::string IP,Connecter *connecter) {
   close(fd);
 }
 void Connector::Shot_Radio(void *C) {
-  // Connector *connector = (Connector *)C;
-  // ThreadPool PL;
-  // PL.init();
-  // PL.submit(Radio,connector);
-  // sleep(3);
-  // PL.submit(Radio,connector);
-  // sleep(3);
-  // PL.submit(Radio,connector);
-  // while(true) {
-  //   PL.submit(Radio,connector);
-  //   sleep(30);
-  // }
-  // PL.shutdown();
+  Connector *connector = (Connector *)C;
+  ThreadPool PL;
+  PL.init();
+  PL.submit(Radio,connector);
+  sleep(3);
+  PL.submit(Radio,connector);
+  sleep(3);
+  PL.submit(Radio,connector);
+  while(true) {
+    TooLKit::Event_T_Callback::Shend_Singal("Radio",connector);
+    PL.submit(Radio,connector);
+    sleep(30);
+  }
+  PL.shutdown();
 }
 
 void Connector::Radio(void* C) {
