@@ -16,5 +16,6 @@ int main(int argc,char *argv[]) {
   auto Main_Tray = new The_Main_tray();               //托盘+主窗口
 
   gtk_main ();                                        //GTK循环
+  // delete Main_Tray;
   return 0;  
 }

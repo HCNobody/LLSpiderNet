@@ -56,13 +56,14 @@ private:
   static void UDP_Server(void* C);
   static void Shot_Radio(void *C);
   static void Radio(void* C);
-  static void Client(void *C,std::string IP);
+  static void Client(void *C,std::string IP,Connecter *connecter);
   static void TCP_Server(void *C);
-  static void Server(void *C,int32_t cfd,std::string IP);
+  static void Server(void *C,int32_t cfd,std::string IP,Connecter *connecter);
 private:
   int32_t radio_clicked_times = 0;
   std::thread thd_UDP_Server_;
   std::thread thd_TCP_Server_;
+  std::thread thd_Shot_Radio_;
 
 };
 

@@ -46,6 +46,7 @@ private:
   static void NewConnect(void *T);
   static void DeleteConnect(void *T);
 private:
+  std::list<std::thread*> pthd_list_;
   GtkWidget *window_;
   GtkStatusIcon *trayIcon_;
   GtkWidget *menu_, *menuItemExit_;

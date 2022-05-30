@@ -53,10 +53,18 @@ The_Main_tray::The_Main_tray(
   gtk_status_icon_set_visible(trayIcon_,true);                            //显示托盘      
                                                                           //
   
-  std::thread(NewConnect,this).detach();
-  std::thread(DeleteConnect,this).detach();
+  std::thread pthd_newconnect = std::thread(NewConnect,this);
+  pthd_newconnect.detach();
+  pthd_list_.push_back(&pthd_newconnect);
+  std::thread pthd_deleteconnect = std::thread(DeleteConnect,this);
+  pthd_deleteconnect.detach();
+  pthd_list_.push_back(&pthd_deleteconnect);
 }
+
 The_Main_tray::~The_Main_tray() {
+  for(auto i:Button_List)delete i;
+  for(auto i:pthd_list_)pthread_cancel(i->native_handle());
+  Button_List.clear();
   delete backend_;
 }
 

@@ -6,15 +6,16 @@ Connector::Connector() {
   Local_ip_char_ = Getip(); 
   inet_pton(AF_INET,Local_ip_char_.c_str(),&Local_ip_int32_);
 
-  std::thread(Shot_Radio,this).detach();
+  thd_Shot_Radio_ = std::thread(Shot_Radio,this);thd_Shot_Radio_.detach();
   thd_UDP_Server_ = std::thread(UDP_Server,this);
   thd_TCP_Server_ = std::thread(TCP_Server,this);
 }
 Connector::~Connector() {
-  thd_UDP_Server_.join();
-  thd_TCP_Server_.join();
-  for(auto i: Client_List_)i->join();
-  for(auto i: Server_List_)i->join();
+  pthread_cancel(thd_UDP_Server_.native_handle());
+  pthread_cancel(thd_TCP_Server_.native_handle());
+  for(auto i: Client_List_){pthread_cancel(i->native_handle());}
+  for(auto i: Server_List_){pthread_cancel(i->native_handle());}
+  pthread_cancel(thd_Shot_Radio_.native_handle());
 }
 
 void Connector::UDP_Server(void* C) {
@@ -77,7 +78,7 @@ void Connector::UDP_Server(void* C) {
     pthread_mutex_unlock(&muteofconnecter_);
     if(exist)continue;
     std::cout << "UDP :<ip="<<smsg<<"> -- now try to connect by TCP/IP"<<std::endl;
-    std::thread *CL = new std::thread(Client,connector,smsg);
+    std::thread *CL = new std::thread(Client,connector,smsg,nullptr);
     CL->detach();
     connector->Client_List_.push_back(CL);
 		sleep(1);
@@ -135,7 +136,7 @@ void Connector::TCP_Server(void *C) {
     connector->Singal.Cond_Singal_newconnect.notify_all();
     locker.unlock();
 
-    std::thread *SE = new std::thread(Server,connector,cfd,NewFrind->ip_char_);
+    std::thread *SE = new std::thread(Server,connector,cfd,NewFrind->ip_char_,NewFrind);
     SE->detach();
     connector->Server_List_.push_back(SE);
   }
@@ -143,7 +144,7 @@ void Connector::TCP_Server(void *C) {
 
 }
 
-void Connector::Client(void *C,std::string IP) {
+void Connector::Client(void *C,std::string IP,Connecter *connecter) {
   Connector *connector = (Connector *)C;
   int32_t fd = socket(AF_INET, SOCK_STREAM, 0);
   if(fd == -1) {perror("ERROR[SOCKEt]");return;}
@@ -153,6 +154,7 @@ void Connector::Client(void *C,std::string IP) {
   saddr.sin_port =htons(10084);
   inet_pton(AF_INET,IP.c_str(),&saddr.sin_addr.s_addr);
   int32_t ret = connect(fd, (sockaddr *)&saddr, sizeof(saddr));
+  Connecter *NewFrind = new Connecter;
   if(ret == -1) {perror("ERROR[CONNECT]");return;}
   {
     char buff[1024];
@@ -161,7 +163,6 @@ void Connector::Client(void *C,std::string IP) {
     for(auto i:connector->connecter_) {
       if(i->ip_char_ == buff){close(fd);return;}
     }
-    Connecter *NewFrind = new Connecter;
     NewFrind->ip_char_  = buff;
     NewFrind->fd_       = fd;
     inet_pton(AF_INET,buff,&NewFrind->ip_);
@@ -174,6 +175,7 @@ void Connector::Client(void *C,std::string IP) {
     connector->Singal.Cond_Singal_newconnect.notify_all();
     locker.unlock();
   }
+  connecter = NewFrind;
   while(true) {
     char buff[1024];
     recv(fd,buff,sizeof(buff),0);
@@ -188,19 +190,19 @@ void Connector::Client(void *C,std::string IP) {
   close(fd);
 }
 void Connector::Shot_Radio(void *C) {
-  Connector *connector = (Connector *)C;
-  ThreadPool PL;
-  PL.init();
-  PL.submit(Radio,connector);
-  sleep(3);
-  PL.submit(Radio,connector);
-  sleep(3);
-  PL.submit(Radio,connector);
-  while(true) {
-    PL.submit(Radio,connector);
-    sleep(30);
-  }
-  PL.shutdown();
+  // Connector *connector = (Connector *)C;
+  // ThreadPool PL;
+  // PL.init();
+  // PL.submit(Radio,connector);
+  // sleep(3);
+  // PL.submit(Radio,connector);
+  // sleep(3);
+  // PL.submit(Radio,connector);
+  // while(true) {
+  //   PL.submit(Radio,connector);
+  //   sleep(30);
+  // }
+  // PL.shutdown();
 }
 
 void Connector::Radio(void* C) {
@@ -246,7 +248,7 @@ void Connector::Radio(void* C) {
   }
 }
 
-void Connector::Server(void *C,int32_t cfd,std::string IP) {
+void Connector::Server(void *C,int32_t cfd,std::string IP,Connecter *connecter) {
   Connector *connector = (Connector *)C;
   send(cfd,connector->Local_ip_char_.c_str(),connector->Local_ip_char_.size(),0);
   while (true) {
