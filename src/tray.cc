@@ -1,4 +1,7 @@
 #include "tray.h"
+#include "Button.h"
+
+std::list<Button *>Button_List;
 
 The_Main_tray::The_Main_tray(
   ) 
@@ -23,7 +26,6 @@ The_Main_tray::The_Main_tray(
   //set popup menu for tray icon
   menu_ = gtk_menu_new();
   menuItemExit_ = gtk_menu_item_new_with_label("Exit");
-  menuItemRadio_ = gtk_menu_item_new_with_label("广播");
 
   g_signal_connect(                                                       //信号绑定：退出窗口
     G_OBJECT(menuItemExit_), 
@@ -31,14 +33,6 @@ The_Main_tray::The_Main_tray(
     G_CALLBACK(TrayExit), 
     NULL
   );
-  g_signal_connect(                                                       //信号绑定：广播
-    G_OBJECT(menuItemRadio_), 
-    "activate", 
-    G_CALLBACK(TrayRadio), 
-    this
-  );
-
-  gtk_menu_shell_append(GTK_MENU_SHELL(menu_), menuItemRadio_);            //
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_), menuItemExit_);            //
   gtk_widget_show_all(menu_);                                             //显示托盘
   //set tooltip
@@ -57,6 +51,10 @@ The_Main_tray::The_Main_tray(
     menu_
   );
   gtk_status_icon_set_visible(trayIcon_,true);                            //显示托盘      
+                                                                          //
+  
+  std::thread(NewConnect,this).detach();
+  std::thread(DeleteConnect,this).detach();
 }
 The_Main_tray::~The_Main_tray() {
   delete backend_;
@@ -95,10 +93,56 @@ void The_Main_tray::TrayIconPopup(
     activate_time
   );
 }
-
-
-void The_Main_tray::TrayRadio(void *T) {
+void The_Main_tray::NewConnect(void *T) {
   The_Main_tray *temple_Tray = (The_Main_tray *)T;
-  temple_Tray->backend_->Shot_Radio();
+  while (true) {  
+    std::unique_lock<std::mutex> locker(temple_Tray->backend_->Singal.Mu_Singal_newconnect);
+    while(temple_Tray->backend_->Date.Singal_newconnect.empty())temple_Tray->backend_->Singal.Cond_Singal_newconnect.wait(locker);
+    while(!temple_Tray->backend_->Date.Singal_newconnect.empty()){
+      std::string aim_ip = temple_Tray->backend_->Date.Singal_newconnect.front();
+      Connecter *temple_connecter = nullptr;
+      for(auto i:temple_Tray->backend_->connecter_) {
+        temple_connecter = i;
+        if(i->ip_char_ == aim_ip)break;
+      }
+      Button *button_ = new Button(temple_Tray,temple_Tray->backend_,temple_connecter);
+      Button_List.push_back(button_);
+      temple_Tray->backend_->Date.Singal_newconnect.pop();
+    }
+    locker.unlock();
+  }
+    
+  return;
 }
 
+
+void The_Main_tray::DeleteConnect(void *T) {
+  The_Main_tray *temple_Tray = (The_Main_tray *)T;
+  while (true) {  
+    std::unique_lock<std::mutex> locker(temple_Tray->backend_->Singal.Mu_Singal_deleteconnect);
+    while(temple_Tray->backend_->Date.Singal_newconnect.empty())temple_Tray->backend_->Singal.Cond_Singal_deleteconnect.wait(locker);
+    while(!temple_Tray->backend_->Date.Singal_deleteconnect.empty()){
+      std::string aim_ip = temple_Tray->backend_->Date.Singal_deleteconnect.front();
+      Connecter *temple_connecter = nullptr;
+      for(auto i:temple_Tray->backend_->connecter_) {
+        temple_connecter = i;
+        if(i->ip_char_ == aim_ip)break;
+      }
+      temple_Tray->backend_->connecter_.remove(temple_connecter);
+      delete[] temple_connecter;
+
+      Button *temple_button = nullptr;
+      for(auto i:Button_List) {
+        temple_button = i;
+        if(i->ip_char_ == aim_ip)break;
+      }
+      Button_List.remove(temple_button);
+      delete[] temple_button;
+
+      temple_Tray->backend_->Date.Singal_deleteconnect.pop();
+    }
+    locker.unlock();
+  }
+    
+  return;
+}

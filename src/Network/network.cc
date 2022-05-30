@@ -6,7 +6,7 @@ Connector::Connector() {
   Local_ip_char_ = Getip(); 
   inet_pton(AF_INET,Local_ip_char_.c_str(),&Local_ip_int32_);
 
-  Shot_Radio();
+  std::thread(Shot_Radio,this).detach();
   thd_UDP_Server_ = std::thread(UDP_Server,this);
   thd_TCP_Server_ = std::thread(TCP_Server,this);
 }
@@ -130,7 +130,12 @@ void Connector::TCP_Server(void *C) {
     std::cout << "-- TCP:New Frind<ip="<<caddr.sin_addr.s_addr<<">"<<std::endl;
     pthread_mutex_unlock(&muteofconnecter_);
 
-    std::thread *SE = new std::thread(Server,connector,cfd);
+    std::unique_lock<std::mutex> locker(connector->Singal.Mu_Singal_newconnect);
+    connector->Date.Singal_newconnect.push(NewFrind->ip_char_);
+    connector->Singal.Cond_Singal_newconnect.notify_all();
+    locker.unlock();
+
+    std::thread *SE = new std::thread(Server,connector,cfd,NewFrind->ip_char_);
     SE->detach();
     connector->Server_List_.push_back(SE);
   }
@@ -157,13 +162,17 @@ void Connector::Client(void *C,std::string IP) {
       if(i->ip_char_ == buff){close(fd);return;}
     }
     Connecter *NewFrind = new Connecter;
-    NewFrind->ip_char_ = buff;
-    NewFrind->fd_      = fd;
+    NewFrind->ip_char_  = buff;
+    NewFrind->fd_       = fd;
     inet_pton(AF_INET,buff,&NewFrind->ip_);
     connector->connecter_.push_back(NewFrind);
     pthread_mutex_unlock(&muteofconnecter_);
     std::cout << "-- TCP:New Frind<ip="<<NewFrind->ip_<<">"<<std::endl;
     std::cout <<"Client:"<<buff<<std::endl;
+    std::unique_lock<std::mutex> locker(connector->Singal.Mu_Singal_newconnect);
+    connector->Date.Singal_newconnect.push(buff);
+    connector->Singal.Cond_Singal_newconnect.notify_all();
+    locker.unlock();
   }
   while(true) {
     char buff[1024];
@@ -172,11 +181,26 @@ void Connector::Client(void *C,std::string IP) {
     sprintf(buff,"hhhh");
     send(fd,buff,strlen(buff)+1,0);
   }    
+  std::unique_lock<std::mutex> locker(connector->Singal.Mu_Singal_deleteconnect);
+  connector->Date.Singal_deleteconnect.push(IP);
+  connector->Singal.Cond_Singal_deleteconnect.notify_all();
+  locker.unlock();
   close(fd);
 }
-void Connector::Shot_Radio() {
-  std::thread A = std::thread(Radio,this);
-  A.detach();
+void Connector::Shot_Radio(void *C) {
+  Connector *connector = (Connector *)C;
+  ThreadPool PL;
+  PL.init();
+  PL.submit(Radio,connector);
+  sleep(3);
+  PL.submit(Radio,connector);
+  sleep(3);
+  PL.submit(Radio,connector);
+  while(true) {
+    PL.submit(Radio,connector);
+    sleep(30);
+  }
+  PL.shutdown();
 }
 
 void Connector::Radio(void* C) {
@@ -186,7 +210,7 @@ void Connector::Radio(void* C) {
     ++connector->radio_clicked_times;
     {
       int32_t fd = socket(AF_INET, SOCK_DGRAM, 0);
-      if(fd == -1){perror("ERROR[Socket]\n"); return;}
+      if(fd == -1){perror("ERROR[Socket]\n");--connector->radio_clicked_times;return;}
       int sock = -1;
       if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1) {   
         perror("ERROR[SOCKET]");
@@ -222,7 +246,7 @@ void Connector::Radio(void* C) {
   }
 }
 
-void Connector::Server(void *C,int32_t cfd) {
+void Connector::Server(void *C,int32_t cfd,std::string IP) {
   Connector *connector = (Connector *)C;
   send(cfd,connector->Local_ip_char_.c_str(),connector->Local_ip_char_.size(),0);
   while (true) {
@@ -231,5 +255,9 @@ void Connector::Server(void *C,int32_t cfd) {
     send(cfd,buff,sizeof(buff),0);
     if(len == 0)break;
   }
+  std::unique_lock<std::mutex> locker(connector->Singal.Mu_Singal_deleteconnect);
+  connector->Date.Singal_newconnect.push(IP);
+  connector->Singal.Cond_Singal_deleteconnect.notify_all();
+  locker.unlock();
   close(cfd);
 }

@@ -31,7 +31,8 @@ class The_Main_tray {
 public:
   The_Main_tray();
   ~The_Main_tray();
-
+public:
+private:
   // static The_Main_tray *pThis;
   static void TrayExit(GtkMenuItem *item, gpointer user_data);
   static void TrayIconActivated(GObject *trayIcon, gpointer data);
@@ -42,14 +43,15 @@ public:
     gpointer popUpMenu
   );
   static void TrayRadio(void *T);
-
-  friend void Monitor(The_Main_tray *T,Connector *C);
+  static void NewConnect(void *T);
+  static void DeleteConnect(void *T);
 private:
   GtkWidget *window_;
   GtkStatusIcon *trayIcon_;
-  GtkWidget *menu_, *menuItemExit_, *menuItemRadio_;
+  GtkWidget *menu_, *menuItemExit_;
   Connector *backend_ = new Connector;
 };
+
 
 
 

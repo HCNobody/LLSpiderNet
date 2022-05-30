@@ -41,8 +41,9 @@ include_directories(./include)
 
 #静态库编译
 add_library(tray STATIC ./src/tray.cc)
-target_link_libraries(tray ${FC_DEP_LIBS})
-target_link_libraries(tray ${FC_DEP_LIBS} network)
+add_library(button STATIC ./src/Button.cc)
+target_link_libraries(button ${FC_DEP_LIBS} network)
+target_link_libraries(tray ${FC_DEP_LIBS} network button)
 
 
 #动态库编译
@@ -52,6 +53,7 @@ set(link_d_shared ${link_d_shared})
 set(link_d ${link_d} 
            ${link_d_shared}
             tray 
+            button
 )
 #生成目标文件
 add_executable(LLSpiderNet main.cc)
