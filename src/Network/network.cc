@@ -18,7 +18,9 @@ Connector::~Connector() {
   pthread_cancel(thd_Shot_Radio_.native_handle());
 }
 
+
 void Connector::UDP_Server(void* C) {
+  sleep(1);
   Connector *connector = (Connector *)C;
 
   setvbuf(stdout, NULL, _IONBF, 0); 
@@ -68,13 +70,13 @@ void Connector::UDP_Server(void* C) {
 	while(1) {
 		//从广播地址接受消息
 		int ret=recvfrom(sock, smsg, 100, 0, (struct sockaddr*)&from,(socklen_t*)&len);
-    if(smsg == connector->Local_ip_char_)continue;
+    // if(smsg == connector->Local_ip_char_)continue;
     pthread_mutex_lock(&muteofconnecter_);
     bool exist = false;
     for(auto i:connector->connecter_) {
       if(i->ip_char_ == smsg) {exist = true;continue;}
     }
-    if(smsg == Local_ip1 || smsg == Local_ip2)exist = true;
+    // if(smsg == Local_ip1 || smsg == Local_ip2)exist = true;
     pthread_mutex_unlock(&muteofconnecter_);
     if(exist)continue;
     std::cout << "UDP :<ip="<<smsg<<"> -- now try to connect by TCP/IP"<<std::endl;
@@ -95,11 +97,19 @@ void Connector::TCP_Server(void *C) {
   saddr.sin_family = AF_INET;
   saddr.sin_port =htons(10084);
   saddr.sin_addr.s_addr = INADDR_ANY;
+  int32_t optval = 1;
+  setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
   int32_t ret = bind(fd, (sockaddr *)&saddr, sizeof(saddr));
   if(ret == -1) {perror("ERROR[BIND]");return;}
 
   ret = listen(fd,50);
 
+  connector->epfd_ = epoll_create(1);
+  if(connector->epfd_ == -1) {
+    perror("ERROR[EPOLL_CREAT]");
+  }
+
+  // epoll_ctl(epfd, EPOLL_CTL_ADD, lfd, )
   int32_t Local_ip1 = 16777343;
   int32_t Local_ip2 = 0;
 
@@ -117,7 +127,7 @@ void Connector::TCP_Server(void *C) {
         continue;
       }
     }
-    if(caddr.sin_addr.s_addr == Local_ip1 || caddr.sin_addr.s_addr == Local_ip2)exist = true;
+    // if(caddr.sin_addr.s_addr == Local_ip1 || caddr.sin_addr.s_addr == Local_ip2)exist = true;
     if(exist) {
       pthread_mutex_unlock(&muteofconnecter_);
       continue;
@@ -128,13 +138,7 @@ void Connector::TCP_Server(void *C) {
     NewFrind->ip_      = caddr.sin_addr.s_addr;
     NewFrind->fd_      = cfd;
     connector->connecter_.push_back(NewFrind);
-    std::cout << "-- TCP:New Frind<ip="<<caddr.sin_addr.s_addr<<">"<<std::endl;
     pthread_mutex_unlock(&muteofconnecter_);
-
-    std::unique_lock<std::mutex> locker(connector->Singal.Mu_Singal_newconnect);
-    connector->Date.Singal_newconnect.push(NewFrind->ip_char_);
-    connector->Singal.Cond_Singal_newconnect.notify_all();
-    locker.unlock();
 
     std::thread *SE = new std::thread(Server,connector,cfd,NewFrind->ip_char_,NewFrind);
     SE->detach();
@@ -169,25 +173,12 @@ void Connector::Client(void *C,std::string IP,Connecter *connecter) {
     connector->connecter_.push_back(NewFrind);
     pthread_mutex_unlock(&muteofconnecter_);
     std::cout << "-- TCP:New Frind<ip="<<NewFrind->ip_<<">"<<std::endl;
-    std::cout <<"Client:"<<buff<<std::endl;
-    std::unique_lock<std::mutex> locker(connector->Singal.Mu_Singal_newconnect);
-    connector->Date.Singal_newconnect.push(buff);
-    connector->Singal.Cond_Singal_newconnect.notify_all();
-    locker.unlock();
+    std::cout <<"Client:"<<buff<<" fd:"<<fd<<std::endl;
+    epoll_event ev;
+    ev.events = EPOLLIN;
+    ev.data.fd = fd;
+    epoll_ctl(connector->epfd_, EPOLL_CTL_ADD, fd, &ev);
   }
-  connecter = NewFrind;
-  while(true) {
-    char buff[1024];
-    recv(fd,buff,sizeof(buff),0);
-    memset(buff,0,sizeof(buff));
-    sprintf(buff,"hhhh");
-    send(fd,buff,strlen(buff)+1,0);
-  }    
-  std::unique_lock<std::mutex> locker(connector->Singal.Mu_Singal_deleteconnect);
-  connector->Date.Singal_deleteconnect.push(IP);
-  connector->Singal.Cond_Singal_deleteconnect.notify_all();
-  locker.unlock();
-  close(fd);
 }
 void Connector::Shot_Radio(void *C) {
   Connector *connector = (Connector *)C;
@@ -199,7 +190,6 @@ void Connector::Shot_Radio(void *C) {
   sleep(3);
   PL.submit(Radio,connector);
   while(true) {
-    TooLKit::Event_T_Callback::Shend_Singal("Radio",connector);
     PL.submit(Radio,connector);
     sleep(30);
   }
@@ -251,16 +241,12 @@ void Connector::Radio(void* C) {
 
 void Connector::Server(void *C,int32_t cfd,std::string IP,Connecter *connecter) {
   Connector *connector = (Connector *)C;
+  std::cout << "-- TCP:New Frind<ip="<<IP<<"> fd:"<<cfd<<std::endl;
   send(cfd,connector->Local_ip_char_.c_str(),connector->Local_ip_char_.size(),0);
-  while (true) {
-    char buff[1024];
-    int32_t len = recv(cfd, buff, sizeof(buff),0);
-    send(cfd,buff,sizeof(buff),0);
-    if(len == 0)break;
-  }
-  std::unique_lock<std::mutex> locker(connector->Singal.Mu_Singal_deleteconnect);
-  connector->Date.Singal_newconnect.push(IP);
-  connector->Singal.Cond_Singal_deleteconnect.notify_all();
-  locker.unlock();
-  close(cfd);
+  epoll_event ev;
+  ev.events = EPOLLIN;
+  ev.data.fd = cfd;
+  epoll_ctl(connector->epfd_, EPOLL_CTL_ADD, cfd, &ev);
+  send(cfd,connector->Local_ip_char_.c_str(),connector->Local_ip_char_.size(),0);
+  TooLKit::Event_T_Callback::Send_Signal("NewConnect",connector);
 }

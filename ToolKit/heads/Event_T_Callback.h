@@ -10,6 +10,7 @@
 #include <utility>
 #include <vector>
 #include <map>
+#include <unordered_map>
 #include <iostream>
 #include <list>
 
@@ -27,7 +28,7 @@ namespace HIDE{
     int32_t mode;
   };
   extern ThreadPool *PL;
-  extern std::map<std::string,std::list<FuncShooter*>> The_Map_;
+  extern std::unordered_map<std::string,std::list<FuncShooter*>> The_Map_;
   class AutoRun{
     public:
       AutoRun();
@@ -82,7 +83,7 @@ namespace Event_T_Callback{
       return true;
   }
 
-  extern bool Shend_Singal(std::string Signal,void *Shooter);
+  extern bool Send_Signal(std::string Signal,void *Shooter);
   extern bool Delete_Bind(std::string Signal,void *Shooter);
 }
 }

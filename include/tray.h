@@ -46,8 +46,9 @@ private:
   static void TrayRadio(void *T);
   static void NewConnect(void *T);
   static void DeleteConnect(void *T);
-  static void play(int k);
+  static void Epoll_Monitor(void *T);
 private:
+  std::vector<std::thread*> thd_Epoll_Monitor_;
   std::list<std::thread*> pthd_list_;
   GtkWidget *window_;
   GtkStatusIcon *trayIcon_;

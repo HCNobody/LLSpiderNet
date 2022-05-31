@@ -7,7 +7,7 @@ namespace HIDE {
   std::mutex mut_The_map_;
   std::mutex mut_The_pthd__;
   ThreadPool *PL = new ThreadPool(8);
-  std::map<std::string,std::list<FuncShooter*>> The_Map_;
+  std::unordered_map<std::string,std::list<FuncShooter*>> The_Map_;
   AutoRun autorun;
 }
 }
@@ -15,7 +15,7 @@ namespace HIDE {
 
 namespace TooLKit{
 namespace Event_T_Callback{
-  bool Shend_Singal(std::string Signal,void *Shooter) {
+  bool Send_Signal(std::string Signal,void *Shooter) {
     HIDE::mut_The_map_.lock();
     auto itl = TooLKit::Event_T_Callback::HIDE::The_Map_.find(Signal);
     if(itl == TooLKit::Event_T_Callback::HIDE::The_Map_.end()) {
